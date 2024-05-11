@@ -1,7 +1,7 @@
 package com.kamp.votersearch.impl;
 
 import com.kamp.votersearch.Voter;
-import com.kamp.votersearch.VoterRepository;
+//import com.kamp.votersearch.VoterRepository;
 import com.kamp.votersearch.VoterService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -18,13 +18,14 @@ import java.util.List;
 
 @Service
 public class VoterServiceImpl implements VoterService {
-    private final VoterRepository voterRepository;
+//    private final VoterRepository voterRepository;
     private final ResourceLoader resourceLoader;
     private boolean isUploaded = false;
+    List<Voter> voters = new ArrayList<>();
 
-    public VoterServiceImpl(VoterRepository voterRepository, ResourceLoader resourceLoader) {
+    public VoterServiceImpl(/*VoterRepository voterRepository,*/ ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
-        this.voterRepository = voterRepository;
+//        this.voterRepository = voterRepository;
     }
 
     @Override
@@ -32,20 +33,24 @@ public class VoterServiceImpl implements VoterService {
         if (!isUploaded) {
             addVoter(null);
         }
-        return voterRepository.findAll();
+        return voters;
+//        return voterRepository.findAll();
     }
 
     @Override
     public List<Voter> findAllVoters(String keyword) {
         if (keyword != null) {
-            return voterRepository.search(keyword);
+//            return voterRepository.search(keyword);
+            return voters.stream().filter(s->s.getFullName().startsWith(keyword)).toList();
         }
-        return voterRepository.findAll();
+//        return voterRepository.findAll();
+        return voters;
     }
 
     @Override
     public Voter findByFullName(String firstName) {
-        return voterRepository.findByFullName(firstName);
+//        return voterRepository.findByFullName(firstName);
+        return voters.stream().filter(s->s.getFullName().equals(firstName)).findFirst().orElse(null);
     }
 
     @Override
@@ -60,14 +65,14 @@ public class VoterServiceImpl implements VoterService {
             voter.setRelationName("Shivappa");
             exelUpload();
             isUploaded = true;
-            voterRepository.save(voter);
+            voters.add(voter);
+//            voterRepository.save(voter);
         }
     }
 
     @Override
     public void exelUpload() {
         Resource resource = resourceLoader.getResource("classpath:validvoters.xlsx");
-        List<Voter> voters = new ArrayList<>();
         try {
             XSSFWorkbook workbook = new XSSFWorkbook(resource.getInputStream());
             XSSFSheet sheet = workbook.getSheet("Sheet1");
@@ -101,7 +106,7 @@ public class VoterServiceImpl implements VoterService {
                 }
                 voters.add(voter);
             }
-            voterRepository.saveAll(voters);
+//            voterRepository.saveAll(voters);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
